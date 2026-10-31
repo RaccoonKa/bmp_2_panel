@@ -27,19 +27,6 @@ public partial class MainWindow : Window
     private readonly BitmapImage _imgRedOff = new(new Uri("/bmp_2_panel;component/assets/lights/red.png", UriKind.Relative));
     private readonly BitmapImage _imgRedBright = new(new Uri("/bmp_2_panel;component/assets/lights/red_bright.png", UriKind.Relative));
 
-    private readonly BitmapImage _imgAmmeter = new(new Uri("/bmp_2_panel;component/assets/sensors/ammeter.png", UriKind.Relative));
-    private readonly BitmapImage _imgAmmeterBright = new(new Uri("/bmp_2_panel;component/assets/sensors/ammeter_bright.png", UriKind.Relative));
-    private readonly BitmapImage _imgLubricant = new(new Uri("/bmp_2_panel;component/assets/sensors/lubricant.png", UriKind.Relative));
-    private readonly BitmapImage _imgLubricantBright = new(new Uri("/bmp_2_panel;component/assets/sensors/lubricant_bright.png", UriKind.Relative));
-    private readonly BitmapImage _imgOil = new(new Uri("/bmp_2_panel;component/assets/sensors/oil.png", UriKind.Relative));
-    private readonly BitmapImage _imgOilBright = new(new Uri("/bmp_2_panel;component/assets/sensors/oil_bright.png", UriKind.Relative));
-    private readonly BitmapImage _imgSpeedometer = new(new Uri("/bmp_2_panel;component/assets/sensors/speedometer.png", UriKind.Relative));
-    private readonly BitmapImage _imgSpeedometerBright = new(new Uri("/bmp_2_panel;component/assets/sensors/speedometer_bright.png", UriKind.Relative));
-    private readonly BitmapImage _imgTemperature = new(new Uri("/bmp_2_panel;component/assets/sensors/temperature.png", UriKind.Relative));
-    private readonly BitmapImage _imgTemperatureBright = new(new Uri("/bmp_2_panel;component/assets/sensors/temperature_bright.png", UriKind.Relative));
-    private readonly BitmapImage _imgTurnover = new(new Uri("/bmp_2_panel;component/assets/sensors/turnover.png", UriKind.Relative));
-    private readonly BitmapImage _imgTurnoverBright = new(new Uri("/bmp_2_panel;component/assets/sensors/turnover_bright.png", UriKind.Relative));
-
     private FrameworkElement? _activeKnob;
     private Point _lastKnobMousePos;
 
@@ -70,6 +57,7 @@ public partial class MainWindow : Window
     {
         MainMenuOverlay.Visibility = Visibility.Visible;
         TopHud.Visibility = Visibility.Collapsed;
+        TacticalInfoCard.Visibility = Visibility.Collapsed;
     }
 
     private static DropShadowEffect CreateLampGlow(Color color, double radius = 35)
@@ -99,9 +87,20 @@ public partial class MainWindow : Window
         Panel.SetZIndex(lamp, isLit ? 50 : 0);
     }
 
+    private void ShowControlInfo(string tagOrName)
+    {
+        if (_currentMode != "Free") return;
+
+        var (title, subtitle, desc) = GetControlInfoText(tagOrName);
+        TacticalInfoCard.SetInfo(title, subtitle, desc);
+        TacticalInfoCard.Visibility = Visibility.Visible;
+    }
+
     private void ToggleSwitch_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not ToggleButton toggle) return;
+
+        ShowControlInfo(toggle.Name);
 
         if (toggle.Name == "TogglePanelLight")
         {
@@ -120,13 +119,13 @@ public partial class MainWindow : Window
                 Duration = TimeSpan.FromMilliseconds(300)
             };
 
-            SensorHourMeterBright.BeginAnimation(UIElement.OpacityProperty, dialAnim);
-            SensorAmmeterBright.BeginAnimation(UIElement.OpacityProperty, dialAnim);
-            SensorTurnoverBright.BeginAnimation(UIElement.OpacityProperty, dialAnim);
-            SensorSpeedometerBright.BeginAnimation(UIElement.OpacityProperty, dialAnim);
-            SensorTemperatureBright.BeginAnimation(UIElement.OpacityProperty, dialAnim);
-            SensorOilBright.BeginAnimation(UIElement.OpacityProperty, dialAnim);
-            SensorLubricantBright.BeginAnimation(UIElement.OpacityProperty, dialAnim);
+            if (FindName("SensorHourMeterBright") is Image hm) hm.BeginAnimation(UIElement.OpacityProperty, dialAnim);
+            if (FindName("SensorAmmeterBright") is Image am) am.BeginAnimation(UIElement.OpacityProperty, dialAnim);
+            if (FindName("SensorTurnoverBright") is Image to) to.BeginAnimation(UIElement.OpacityProperty, dialAnim);
+            if (FindName("SensorSpeedometerBright") is Image sm) sm.BeginAnimation(UIElement.OpacityProperty, dialAnim);
+            if (FindName("SensorTemperatureBright") is Image tm) tm.BeginAnimation(UIElement.OpacityProperty, dialAnim);
+            if (FindName("SensorOilBright") is Image om) om.BeginAnimation(UIElement.OpacityProperty, dialAnim);
+            if (FindName("SensorLubricantBright") is Image lm) lm.BeginAnimation(UIElement.OpacityProperty, dialAnim);
             return;
         }
 
@@ -140,8 +139,7 @@ public partial class MainWindow : Window
     private void PushButton_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button btn) return;
-
-        string btnName = btn.Name;
+        ShowControlInfo(btn.Name);
     }
 
     private BitmapImage GetCloseImage(string btnName)
@@ -168,6 +166,7 @@ public partial class MainWindow : Window
     private void ButtonArea_MouseDown(object sender, MouseButtonEventArgs e)
     {
         if (sender is not FrameworkElement el || el.Tag is not string btnName) return;
+        ShowControlInfo(btnName);
 
         bool isOpen = _capStates.GetValueOrDefault(btnName, false);
         if (!isOpen)
@@ -225,9 +224,81 @@ public partial class MainWindow : Window
         }
     }
 
+    private void Sensor_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not FrameworkElement el || el.Tag is not string tag) return;
+        ShowControlInfo(tag);
+
+        if (_currentMode != "Free") return;
+
+        var rand = new Random();
+        AnimateNeedlesRecursively(el, rand);
+    }
+
+    private void AnimateNeedlesRecursively(DependencyObject parent, Random rand)
+    {
+        if (parent is Panel panel)
+        {
+            foreach (UIElement child in panel.Children)
+            {
+                if (child is Image img && img.Name != null && img.Name.StartsWith("Needle") && img.RenderTransform is RotateTransform rotate)
+                {
+                    double targetAngle;
+                    if (img.Name == "NeedleTemperatureLeft")
+                    {
+                        targetAngle = rand.Next(40, 125);
+                    }
+                    else if (img.Name == "NeedleTemperatureRight")
+                    {
+                        targetAngle = rand.Next(-125, -40);
+                    }
+                    else if (img.Name == "NeedleAmmeter")
+                    {
+                        targetAngle = rand.Next(-30, 30);
+                    }
+                    else
+                    {
+                        targetAngle = rand.Next(-60, 60);
+                    }
+
+                    var anim = new DoubleAnimation
+                    {
+                        To = targetAngle,
+                        Duration = TimeSpan.FromMilliseconds(450),
+                        EasingFunction = new BackEase { Amplitude = 0.35, EasingMode = EasingMode.EaseOut }
+                    };
+                    rotate.BeginAnimation(RotateTransform.AngleProperty, anim);
+                }
+                else
+                {
+                    AnimateNeedlesRecursively(child, rand);
+                }
+            }
+        }
+    }
+
+    private (string Title, string Subtitle, string Description) GetControlInfoText(string id)
+    {
+        return id switch
+        {
+            "Ammeter" => ("АМПЕРМЕТР В-1", "Контроль тока", "Показывает силу зарядного или разрядного тока аккумуляторных батарей. При работающем двигателе стрелка должна находиться в плюсовой зоне."),
+            "HourMeter" => ("СЧЕТЧИК МОТОЧАСОВ", "Учёт времени", "Регистрирует суммарное время работы двигателя в часах."),
+            "Turnover" => ("ТАХОМЕТР ТЭ-45", "Обороты двигателя", "Указывает частоту вращения коленчатого вала в сотнях об/мин. Нормальные обороты — 15-20 (1500-2000 об/мин)."),
+            "Speedometer" => ("СПИДОМЕТР", "Скорость и пробег", "Отображает текущую скорость движения машины (км/ч) и пройденный километраж."),
+            "Temperature" => ("ТЕРМОМЕТР ТУЭ-48", "Контроль температуры", "Отображает температуру охлаждающей жидкости (слева) и масла двигателя (справа)."),
+            "Oil" => ("МАСЛО ДВ.", "Давление масла двигателя", "Показывает давление в системе смазки двигателя. Нормальное значение — 4-5 кгс/см²."),
+            "Lubricant" => ("СМАЗКА КПП", "Давление смазки", "Отображает текущее давление масла в системе смазки коробки передач."),
+            
+            "TogglePanelLight" => ("ОСВЕЩЕНИЕ ЩИТКА", "Тумблер", "Включает ночную подсветку шкал приборов и затемняет панель для соблюдения светомаскировки."),
+            
+            _ => ("ЭЛЕМЕНТ УПРАВЛЕНИЯ", "Система БМП-2", "Интерактивный элемент щитка механика-водителя.")
+        };
+    }
+
     private void Knob_MouseDown(object sender, MouseButtonEventArgs e)
     {
         if (sender is not FrameworkElement el) return;
+        ShowControlInfo("Knob");
 
         _activeKnob = el;
         _lastKnobMousePos = e.GetPosition(this);

@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Запуск БМП-2",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bmp_2_panel/bin/Debug/net8.0-windows/bmp_2_panel.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}/bmp_2_panel",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        }
+    ]
+}

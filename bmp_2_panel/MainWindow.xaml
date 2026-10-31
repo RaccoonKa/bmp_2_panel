@@ -821,91 +821,104 @@
                        Canvas.Left="45" Canvas.Top="692"
                        Style="{StaticResource SensorBrightOverlay}"/>
 
-                <Grid Canvas.Left="300" Canvas.Top="705" Width="190" Height="190">
-                    <Image x:Name="SensorAmmeter" 
-                           Source="/bmp_2_panel;component/assets/sensors/ammeter.png" 
-                           Stretch="Uniform" 
-                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                <Grid Canvas.Left="300" Canvas.Top="705" Width="190" Height="190" Cursor="Hand" Tag="Ammeter" MouseLeftButtonDown="Sensor_MouseDown">
+                    <Image x:Name="SensorAmmeter" Source="/bmp_2_panel;component/assets/sensors/ammeter.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image x:Name="SensorAmmeterBright" Source="/bmp_2_panel;component/assets/sensors/ammeter_bright.png" Style="{StaticResource SensorBrightOverlay}"/>
+                    
+                    <Canvas Width="190" Height="190">
+                        <Image x:Name="NeedleAmmeter" Source="/bmp_2_panel;component/assets/sensors/needle.png" 
+                               Width="22" Height="90" Canvas.Left="84" Canvas.Top="26" 
+                               Panel.ZIndex="45" RenderOptions.BitmapScalingMode="HighQuality" RenderTransformOrigin="0.5,0.88">
+                            <Image.RenderTransform><RotateTransform Angle="-20"/></Image.RenderTransform>
+                        </Image>
+                    </Canvas>
                 </Grid>
-                <Image x:Name="SensorAmmeterBright" 
-                       Source="/bmp_2_panel;component/assets/sensors/ammeter_bright.png" 
-                       Width="190" Height="190" 
-                       Canvas.Left="300" Canvas.Top="705"
-                       Style="{StaticResource SensorBrightOverlay}"/>
 
-                <Grid Canvas.Left="540" Canvas.Top="670" Width="230" Height="230">
-                    <Image x:Name="SensorTurnover" 
-                           Source="/bmp_2_panel;component/assets/sensors/turnover.png" 
-                           Stretch="Uniform" 
-                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                <Grid Canvas.Left="540" Canvas.Top="670" Width="230" Height="230" Cursor="Hand" Tag="Turnover" MouseLeftButtonDown="Sensor_MouseDown">
+                    <Image x:Name="SensorTurnover" Source="/bmp_2_panel;component/assets/sensors/turnover.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="20" Height="20" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="21,21,0,0" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="20" Height="20" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,21,21,0" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="20" Height="20" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="21,0,0,21" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="20" Height="20" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,21,21" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image x:Name="SensorTurnoverBright" Source="/bmp_2_panel;component/assets/sensors/turnover_bright.png" Style="{StaticResource SensorBrightOverlay}"/>
+                    
+                    <Canvas Width="230" Height="230">
+                        <Image x:Name="NeedleTurnover" Source="/bmp_2_panel;component/assets/sensors/needle.png" 
+                               Width="24" Height="110" Canvas.Left="103" Canvas.Top="18" 
+                               Panel.ZIndex="45" RenderOptions.BitmapScalingMode="HighQuality" RenderTransformOrigin="0.5,0.88">
+                            <Image.RenderTransform><RotateTransform Angle="-60"/></Image.RenderTransform>
+                        </Image>
+                    </Canvas>
                 </Grid>
-                <Image x:Name="SensorTurnoverBright" 
-                       Source="/bmp_2_panel;component/assets/sensors/turnover_bright.png" 
-                       Width="230" Height="230" 
-                       Canvas.Left="540" Canvas.Top="670"
-                       Style="{StaticResource SensorBrightOverlay}"/>
 
-                <Image x:Name="SensorSpeedometer" 
-                       Source="/bmp_2_panel;component/assets/sensors/speedometer.png" 
-                       Width="370" Height="370" 
-                       Canvas.Left="775" Canvas.Top="600"/>
-                <Image x:Name="SensorSpeedometerBright" 
-                       Source="/bmp_2_panel;component/assets/sensors/speedometer_bright.png" 
-                       Width="370" Height="370" 
-                       Canvas.Left="775" Canvas.Top="600"
-                       Style="{StaticResource SensorBrightOverlay}"/>
+                <Grid Canvas.Left="775" Canvas.Top="600" Width="370" Height="370" Cursor="Hand" Tag="Speedometer" MouseLeftButtonDown="Sensor_MouseDown">
+                    <Image x:Name="SensorSpeedometer" Source="/bmp_2_panel;component/assets/sensors/speedometer.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image x:Name="SensorSpeedometerBright" Source="/bmp_2_panel;component/assets/sensors/speedometer_bright.png" Style="{StaticResource SensorBrightOverlay}"/>
+                    
+                    <Canvas Width="370" Height="370">
+                        <Image x:Name="NeedleSpeedometer" Source="/bmp_2_panel;component/assets/sensors/speedometer_needle.png" 
+                               Width="56" Height="195" Canvas.Left="157" Canvas.Top="42" 
+                               Panel.ZIndex="45" RenderOptions.BitmapScalingMode="HighQuality" RenderTransformOrigin="0.5,0.86">
+                            <Image.RenderTransform><RotateTransform Angle="-45"/></Image.RenderTransform>
+                        </Image>
+                    </Canvas>
+                </Grid>
 
-                <Grid Canvas.Left="1150" Canvas.Top="673" Width="230" Height="230">
-                    <Image x:Name="SensorTemperature" 
-                           Source="/bmp_2_panel;component/assets/sensors/temperature.png" 
-                           Stretch="Uniform" 
-                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                <Grid Canvas.Left="1150" Canvas.Top="673" Width="230" Height="230" Cursor="Hand" Tag="Temperature" MouseLeftButtonDown="Sensor_MouseDown">
+                    <Image x:Name="SensorTemperature" Source="/bmp_2_panel;component/assets/sensors/temperature.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="20" Height="20" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="21,21,0,0" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="20" Height="20" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,21,21,0" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="20" Height="20" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="21,0,0,21" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="20" Height="20" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,21,21" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image x:Name="SensorTemperatureBright" Source="/bmp_2_panel;component/assets/sensors/temperature_bright.png" Style="{StaticResource SensorBrightOverlay}"/>
+                    
+                    <Canvas Width="230" Height="230">
+                        <Image x:Name="NeedleTemperatureLeft" Source="/bmp_2_panel;component/assets/sensors/needle.png" 
+                               Width="18" Height="65" Canvas.Left="43" Canvas.Top="58" 
+                               Panel.ZIndex="45" RenderOptions.BitmapScalingMode="HighQuality" RenderTransformOrigin="0.5,0.88">
+                            <Image.RenderTransform><RotateTransform Angle="70"/></Image.RenderTransform>
+                        </Image>
+                        <Image x:Name="NeedleTemperatureRight" Source="/bmp_2_panel;component/assets/sensors/needle.png" 
+                               Width="18" Height="65" Canvas.Left="169" Canvas.Top="58" 
+                               Panel.ZIndex="45" RenderOptions.BitmapScalingMode="HighQuality" RenderTransformOrigin="0.5,0.88">
+                            <Image.RenderTransform><RotateTransform Angle="-75"/></Image.RenderTransform>
+                        </Image>
+                    </Canvas>
                 </Grid>
-                <Image x:Name="SensorTemperatureBright" 
-                       Source="/bmp_2_panel;component/assets/sensors/temperature_bright.png" 
-                       Width="230" Height="230" 
-                       Canvas.Left="1150" Canvas.Top="673"
-                       Style="{StaticResource SensorBrightOverlay}"/>
 
-                <Grid Canvas.Left="1425" Canvas.Top="703" Width="200" Height="200">
-                    <Image x:Name="SensorOil" 
-                           Source="/bmp_2_panel;component/assets/sensors/oil.png" 
-                           Stretch="Uniform" 
-                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                <Grid Canvas.Left="1425" Canvas.Top="703" Width="200" Height="200" Cursor="Hand" Tag="Oil" MouseLeftButtonDown="Sensor_MouseDown">
+                    <Image x:Name="SensorOil" Source="/bmp_2_panel;component/assets/sensors/oil.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="21,21,0,0" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="18" Height="18" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,21,21,0" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="21,0,0,21" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="18" Height="18" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,21,21" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image x:Name="SensorOilBright" Source="/bmp_2_panel;component/assets/sensors/oil_bright.png" Style="{StaticResource SensorBrightOverlay}"/>
+                    
+                    <Canvas Width="200" Height="200">
+                        <Image x:Name="NeedleOil" Source="/bmp_2_panel;component/assets/sensors/needle.png" 
+                               Width="22" Height="95" Canvas.Left="89" Canvas.Top="21" 
+                               Panel.ZIndex="45" RenderOptions.BitmapScalingMode="HighQuality" RenderTransformOrigin="0.5,0.88">
+                            <Image.RenderTransform><RotateTransform Angle="-40"/></Image.RenderTransform>
+                        </Image>
+                    </Canvas>
                 </Grid>
-                <Image x:Name="SensorOilBright" 
-                       Source="/bmp_2_panel;component/assets/sensors/oil_bright.png" 
-                       Width="200" Height="200" 
-                       Canvas.Left="1425" Canvas.Top="703"
-                       Style="{StaticResource SensorBrightOverlay}"/>
 
-                <Grid Canvas.Left="1665" Canvas.Top="705" Width="200" Height="200">
-                    <Image x:Name="SensorLubricant" 
-                           Source="/bmp_2_panel;component/assets/sensors/lubricant.png" 
-                           Stretch="Uniform" 
-                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                <Grid Canvas.Left="1665" Canvas.Top="705" Width="200" Height="200" Cursor="Hand" Tag="Lubricant" MouseLeftButtonDown="Sensor_MouseDown">
+                    <Image x:Name="SensorLubricant" Source="/bmp_2_panel;component/assets/sensors/lubricant.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="21,21,0,0" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="18" Height="18" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,21,21,0" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="21,0,0,21" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="18" Height="18" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,21,21" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image x:Name="SensorLubricantBright" Source="/bmp_2_panel;component/assets/sensors/lubricant_bright.png" Style="{StaticResource SensorBrightOverlay}"/>
+                    
+                    <Canvas Width="200" Height="200">
+                        <Image x:Name="NeedleLubricant" Source="/bmp_2_panel;component/assets/sensors/needle.png" 
+                               Width="22" Height="95" Canvas.Left="89" Canvas.Top="21" 
+                               Panel.ZIndex="45" RenderOptions.BitmapScalingMode="HighQuality" RenderTransformOrigin="0.5,0.88">
+                            <Image.RenderTransform><RotateTransform Angle="-45"/></Image.RenderTransform>
+                        </Image>
+                    </Canvas>
                 </Grid>
-                <Image x:Name="SensorLubricantBright" 
-                       Source="/bmp_2_panel;component/assets/sensors/lubricant_bright.png" 
-                       Width="200" Height="200" 
-                       Canvas.Left="1665" Canvas.Top="705"
-                       Style="{StaticResource SensorBrightOverlay}"/>
 
                 <Button x:Name="BtnAbout" 
                         Style="{StaticResource MilitarySystemBtn}" 
