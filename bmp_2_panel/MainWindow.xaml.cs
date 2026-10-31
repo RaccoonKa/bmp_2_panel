@@ -108,7 +108,7 @@ public partial class MainWindow : Window
 
             var dimAnim = new DoubleAnimation
             {
-                To = isNight ? 1.0 : 0.0,
+                To = isNight ? 0.82 : 0.0,
                 Duration = TimeSpan.FromMilliseconds(300)
             };
             NightDimOverlay.BeginAnimation(UIElement.OpacityProperty, dimAnim);
