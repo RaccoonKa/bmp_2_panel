@@ -1,0 +1,34 @@
+## Build and Output directories
+bin/
+obj/
+out/
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+
+## Visual Studio / IDE temporary files and folders
+.vs/
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Agent / Local configs
+.agents/
+
+## Rider / ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+## OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
