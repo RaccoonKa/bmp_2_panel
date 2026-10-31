@@ -13,12 +13,6 @@
         Background="#1E1E1E">
 
     <Window.Resources>
-        <RadialGradientBrush x:Key="DialGlowMask">
-            <GradientStop Color="#FFFFFFFF" Offset="0.0"/>
-            <GradientStop Color="#FFFFFFFF" Offset="0.67"/>
-            <GradientStop Color="#00FFFFFF" Offset="0.80"/>
-        </RadialGradientBrush>
-
         <Style x:Key="SensorBrightOverlay" TargetType="Image">
             <Setter Property="Stretch" Value="Uniform"/>
             <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality"/>
@@ -432,7 +426,7 @@
                 </Image.RenderTransform>
             </Image>
 
-            <Canvas Width="1920" Height="1080" ClipToBounds="True" RenderOptions.BitmapScalingMode="HighQuality">
+            <Canvas x:Name="MainCanvas" Width="1920" Height="1080" ClipToBounds="True" RenderOptions.BitmapScalingMode="HighQuality">
 
                 <Rectangle x:Name="NightDimOverlay" 
                            Canvas.Left="-150" Canvas.Top="-100" 
@@ -486,47 +480,47 @@
                        Source="/bmp_2_panel;component/assets/designations/door.png" 
                        Width="100" Height="40" 
                        Canvas.Left="582" Canvas.Top="490" 
-                       Stretch="Fill"
+                       Stretch="Fill" 
                        IsHitTestVisible="False" 
                        RenderOptions.BitmapScalingMode="HighQuality"/>
                 
-                <Image x:Name="DesignationValvePanel"
+                <Image x:Name="DesignationValvePanel" 
                        Source="/bmp_2_panel;component/assets/designations/valve.png" 
-                       Width="100" Height="40"
+                       Width="100" Height="40" 
                        Canvas.Left="20" Canvas.Top="520" 
-                       Stretch="Fill"
+                       Stretch="Fill" 
                        IsHitTestVisible="False" 
                        RenderOptions.BitmapScalingMode="HighQuality"/>
                 
-                <Image x:Name="DesignationOpenValvePanel"
+                <Image x:Name="DesignationOpenValvePanel" 
                        Source="/bmp_2_panel;component/assets/designations/open_valve.png" 
-                       Width="220" Height="40"
+                       Width="220" Height="40" 
                        Canvas.Left="20" Canvas.Top="600" 
-                       Stretch="Fill"
+                       Stretch="Fill" 
                        IsHitTestVisible="False" 
                        RenderOptions.BitmapScalingMode="HighQuality"/>
                 
-                <Image x:Name="DesignationGroovePanel"
+                <Image x:Name="DesignationGroovePanel" 
                        Source="/bmp_2_panel;component/assets/designations/groove.png" 
-                       Width="100" Height="38"
+                       Width="100" Height="38" 
                        Canvas.Left="175" Canvas.Top="542" 
-                       Stretch="Fill"
+                       Stretch="Fill" 
                        IsHitTestVisible="False" 
                        RenderOptions.BitmapScalingMode="HighQuality"/>
                 
-                <Image x:Name="DesignationRivesPanel"
+                <Image x:Name="DesignationRivesPanel" 
                        Source="/bmp_2_panel;component/assets/designations/rives.png" 
-                       Width="100" Height="40"
+                       Width="100" Height="40" 
                        Canvas.Left="315" Canvas.Top="540" 
-                       Stretch="Fill"
+                       Stretch="Fill" 
                        IsHitTestVisible="False" 
                        RenderOptions.BitmapScalingMode="HighQuality"/>
                 
-                <Image x:Name="DesignationPumpPanel"
+                <Image x:Name="DesignationPumpPanel" 
                        Source="/bmp_2_panel;component/assets/designations/pump.png" 
-                       Width="100" Height="40"
+                       Width="100" Height="40" 
                        Canvas.Left="455" Canvas.Top="540" 
-                       Stretch="Fill"
+                       Stretch="Fill" 
                        IsHitTestVisible="False" 
                        RenderOptions.BitmapScalingMode="HighQuality"/>
                 
@@ -538,20 +532,20 @@
                        IsHitTestVisible="False" 
                        RenderOptions.BitmapScalingMode="HighQuality"/>
                 
-                <Image x:Name="DesignationPowerPanel"
-                       Source="/bmp_2_panel;component/assets/designations/power.png"
-                       Width="490" Height="80"
-                       Canvas.Left="710" Canvas.Top="220"
-                       Stretch="Fill"
-                       IsHitTestVisible="False"
+                <Image x:Name="DesignationPowerPanel" 
+                       Source="/bmp_2_panel;component/assets/designations/power.png" 
+                       Width="490" Height="80" 
+                       Canvas.Left="710" Canvas.Top="220" 
+                       Stretch="Fill" 
+                       IsHitTestVisible="False" 
                        RenderOptions.BitmapScalingMode="HighQuality"/>
                 
-                <Image x:Name="DesignationMLightBPanel"
+                <Image x:Name="DesignationMLightBPanel" 
                        Source="/bmp_2_panel;component/assets/designations/m_light_b.png" 
-                       Width="40" Height="120"
-                       Canvas.Left="1200" Canvas.Top="170"
-                       Stretch="Fill"
-                       IsHitTestVisible="False"
+                       Width="40" Height="120" 
+                       Canvas.Left="1200" Canvas.Top="170" 
+                       Stretch="Fill" 
+                       IsHitTestVisible="False" 
                        RenderOptions.BitmapScalingMode="HighQuality"/>
                 
                 <Image x:Name="DesignationLightsPanel" 
@@ -704,7 +698,7 @@
 
                 <ToggleButton x:Name="TogglePanelLight" 
                               Style="{StaticResource MilitaryToggleCompact}" 
-                              IsChecked="True"
+                              IsChecked="True" 
                               Canvas.Left="915" Canvas.Top="400" 
                               Click="ToggleSwitch_Click"/>
 
@@ -782,7 +776,7 @@
                 <Button x:Name="BtnRed" 
                         Style="{StaticResource MilitaryRedPushBtn}" 
                         Width="100" Height="100" 
-                        Canvas.Left="1250" Canvas.Top="400"
+                        Canvas.Left="1250" Canvas.Top="400" 
                         Click="PushButton_Click"/>
 
                 <Button x:Name="BtnCapR1" Style="{StaticResource MilitaryCapBtn}" Width="130" Height="130" Canvas.Left="1350" Canvas.Top="410" Click="PushButton_Click"/>
@@ -813,15 +807,16 @@
                 <Image x:Name="SensorHourMeter" 
                        Source="/bmp_2_panel;component/assets/sensors/hour_meter.png" 
                        Width="210" Height="210" 
-                       Canvas.Left="45" Canvas.Top="692"
+                       Canvas.Left="45" Canvas.Top="692" 
                        Panel.ZIndex="30"/>
                 <Image x:Name="SensorHourMeterBright" 
                        Source="/bmp_2_panel;component/assets/sensors/hour_meter_bright.png" 
                        Width="210" Height="210" 
-                       Canvas.Left="45" Canvas.Top="692"
-                       Panel.ZIndex="31"
+                       Canvas.Left="45" Canvas.Top="692" 
+                       Panel.ZIndex="31" 
                        Style="{StaticResource SensorBrightOverlay}"/>
 
+                <!-- Амперметр (без накладных винтов) -->
                 <Grid Canvas.Left="300" Canvas.Top="705" Width="190" Height="190" Panel.ZIndex="30" Cursor="Hand" Tag="Ammeter" MouseLeftButtonDown="Sensor_MouseDown">
                     <Image x:Name="SensorAmmeter" Source="/bmp_2_panel;component/assets/sensors/ammeter.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image x:Name="SensorAmmeterBright" Source="/bmp_2_panel;component/assets/sensors/ammeter_bright.png" Style="{StaticResource SensorBrightOverlay}"/>
@@ -837,6 +832,7 @@
                     </Canvas>
                 </Grid>
 
+                <!-- Тахометр (ТЭ-48) -->
                 <Grid Canvas.Left="540" Canvas.Top="670" Width="230" Height="230" Panel.ZIndex="30" Cursor="Hand" Tag="Turnover" MouseLeftButtonDown="Sensor_MouseDown">
                     <Image x:Name="SensorTurnover" Source="/bmp_2_panel;component/assets/sensors/turnover.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="22,22,0,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
@@ -856,6 +852,7 @@
                     </Canvas>
                 </Grid>
 
+                <!-- Спидометр -->
                 <Grid Canvas.Left="775" Canvas.Top="600" Width="370" Height="370" Panel.ZIndex="30" Cursor="Hand" Tag="Speedometer" MouseLeftButtonDown="Sensor_MouseDown">
                     <Image x:Name="SensorSpeedometer" Source="/bmp_2_panel;component/assets/sensors/speedometer.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image x:Name="SensorSpeedometerBright" Source="/bmp_2_panel;component/assets/sensors/speedometer_bright.png" Style="{StaticResource SensorBrightOverlay}"/>
@@ -871,6 +868,7 @@
                     </Canvas>
                 </Grid>
 
+                <!-- Термометр ТУЭ-48 -->
                 <Grid Canvas.Left="1150" Canvas.Top="673" Width="230" Height="230" Panel.ZIndex="30" Cursor="Hand" Tag="Temperature" MouseLeftButtonDown="Sensor_MouseDown">
                     <Image x:Name="SensorTemperature" Source="/bmp_2_panel;component/assets/sensors/temperature.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="22,22,0,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
@@ -880,6 +878,7 @@
                     <Image x:Name="SensorTemperatureBright" Source="/bmp_2_panel;component/assets/sensors/temperature_bright.png" Style="{StaticResource SensorBrightOverlay}"/>
                     
                     <Canvas Width="230" Height="230" Panel.ZIndex="45">
+                        <!-- Левая стрелка (Вода) -->
                         <Image x:Name="NeedleTemperatureLeft" Source="/bmp_2_panel;component/assets/sensors/needle.png" 
                                Width="35" Height="35" Canvas.Left="61" Canvas.Top="81" 
                                Panel.ZIndex="45" RenderOptions.BitmapScalingMode="HighQuality" RenderTransformOrigin="0.5,0.98">
@@ -888,6 +887,7 @@
                         <Ellipse Width="20" Height="20" Fill="#151719" Stroke="#282B2E" StrokeThickness="1" 
                                  Canvas.Left="69" Canvas.Top="106" Panel.ZIndex="46" IsHitTestVisible="False"/>
 
+                        <!-- Правая стрелка (Масло) -->
                         <Image x:Name="NeedleTemperatureRight" Source="/bmp_2_panel;component/assets/sensors/needle.png" 
                                Width="35" Height="35" Canvas.Left="133" Canvas.Top="81" 
                                Panel.ZIndex="45" RenderOptions.BitmapScalingMode="HighQuality" RenderTransformOrigin="0.5,0.98">
@@ -898,6 +898,7 @@
                     </Canvas>
                 </Grid>
 
+                <!-- Масло ДВ -->
                 <Grid Canvas.Left="1425" Canvas.Top="703" Width="200" Height="200" Panel.ZIndex="30" Cursor="Hand" Tag="Oil" MouseLeftButtonDown="Sensor_MouseDown">
                     <Image x:Name="SensorOil" Source="/bmp_2_panel;component/assets/sensors/oil.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="16" Height="16" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="22,22,0,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
@@ -917,10 +918,11 @@
                     </Canvas>
                 </Grid>
 
+                <!-- Смазка КПП -->
                 <Grid Canvas.Left="1665" Canvas.Top="705" Width="200" Height="200" Panel.ZIndex="30" Cursor="Hand" Tag="Lubricant" MouseLeftButtonDown="Sensor_MouseDown">
                     <Image x:Name="SensorLubricant" Source="/bmp_2_panel;component/assets/sensors/lubricant.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="16" Height="16" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="22,22,0,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,22,22,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,22,24,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="16" Height="16" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="22,0,0,22" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,22,22" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image x:Name="SensorLubricantBright" Source="/bmp_2_panel;component/assets/sensors/lubricant_bright.png" Style="{StaticResource SensorBrightOverlay}"/>
@@ -941,7 +943,7 @@
                         Content="О ПРОГРАММЕ" 
                         Width="210" Height="52" 
                         Canvas.Left="1500" Canvas.Top="1005" 
-                        Panel.ZIndex="50"
+                        Panel.ZIndex="50" 
                         Click="BtnAbout_Click"/>
 
                 <Button x:Name="BtnExit" 
@@ -949,8 +951,14 @@
                         Content="ВЫХОД" 
                         Width="150" Height="52" 
                         Canvas.Left="1730" Canvas.Top="1005" 
-                        Panel.ZIndex="50"
+                        Panel.ZIndex="50" 
                         Click="BtnExit_Click"/>
+
+                <local:InfoCard x:Name="TacticalInfoCard" 
+                                Canvas.Left="0" Canvas.Top="0" 
+                                Visibility="Collapsed" 
+                                Panel.ZIndex="150"/>
+                
             </Canvas>
             
             <Border x:Name="TopHud" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,20,0,0" 
@@ -965,12 +973,6 @@
                     <Button Content="СМЕНИТЬ РЕЖИМ" Style="{StaticResource MilitarySystemBtn}" Width="150" Height="34" FontSize="13" Click="BtnShowMenu_Click"/>
                 </StackPanel>
             </Border>
-            
-            <local:InfoCard x:Name="TacticalInfoCard" 
-                            HorizontalAlignment="Right" VerticalAlignment="Bottom" 
-                            Margin="0,0,40,40"
-                            Visibility="Collapsed" 
-                            Panel.ZIndex="150"/>
             
             <Grid x:Name="MainMenuOverlay" Background="#D9000000" Panel.ZIndex="200">
                 <Border HorizontalAlignment="Center" VerticalAlignment="Center" Background="#1C1E20" BorderBrush="#4E555B" BorderThickness="2" CornerRadius="8" Width="550">

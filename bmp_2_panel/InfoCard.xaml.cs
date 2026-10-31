@@ -1,9 +1,8 @@
 using System.Windows;
-using System.Windows.Controls;
 
 namespace bmp_2_panel;
 
-public partial class InfoCard : UserControl
+public partial class InfoCard
 {
     public InfoCard()
     {
@@ -19,6 +18,6 @@ public partial class InfoCard : UserControl
 
     private void BtnClose_Click(object sender, RoutedEventArgs e)
     {
-        this.Visibility = Visibility.Collapsed;
+        Visibility = Visibility.Collapsed;
     }
 }

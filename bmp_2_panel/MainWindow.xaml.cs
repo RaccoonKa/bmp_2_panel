@@ -11,11 +11,11 @@ using System.Windows.Media.Imaging;
 
 namespace bmp_2_panel;
 
-public partial class MainWindow : Window
+public partial class MainWindow
 {
     private string _currentMode = "";
-    
-    private readonly Dictionary<string, bool> _capStates = new();
+
+    private readonly Dictionary<string, bool> _capStates = [];
     private readonly BitmapImage _imgCapClose = new(new Uri("/bmp_2_panel;component/assets/buttons/cap_close.png", UriKind.Relative));
     private readonly BitmapImage _imgCapClose1B = new(new Uri("/bmp_2_panel;component/assets/buttons/cap_close_1b.png", UriKind.Relative));
     private readonly BitmapImage _imgCapClose2B = new(new Uri("/bmp_2_panel;component/assets/buttons/cap_close_2b.png", UriKind.Relative));
@@ -38,9 +38,9 @@ public partial class MainWindow : Window
     private void BtnModeSelect_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button btn || btn.Tag is not string modeTag) return;
-        
+
         _currentMode = modeTag;
-        
+
         TxtCurrentMode.Text = modeTag switch
         {
             "Free" => "СВОБОДНОЕ ОЗНАКОМЛЕНИЕ",
@@ -60,12 +60,12 @@ public partial class MainWindow : Window
         TacticalInfoCard.Visibility = Visibility.Collapsed;
     }
 
-    private static DropShadowEffect CreateLampGlow(Color color, double radius = 35)
+    private static DropShadowEffect CreateLampGlow(Color color)
     {
         return new DropShadowEffect
         {
             Color = color,
-            BlurRadius = radius,
+            BlurRadius = 35,
             ShadowDepth = 0,
             Opacity = 1.0
         };
@@ -76,35 +76,77 @@ public partial class MainWindow : Window
         if (isGreen)
         {
             lamp.Source = isLit ? _imgGreenBright : _imgGreenOff;
-            lamp.Effect = isLit ? CreateLampGlow(Color.FromRgb(40, 255, 80), 35) : null;
+            lamp.Effect = isLit ? CreateLampGlow(Color.FromRgb(40, 255, 80)) : null;
         }
         else
         {
             lamp.Source = isLit ? _imgRedBright : _imgRedOff;
-            lamp.Effect = isLit ? CreateLampGlow(Color.FromRgb(255, 45, 25), 32) : null;
+            lamp.Effect = isLit ? CreateLampGlow(Color.FromRgb(255, 45, 25)) : null;
         }
 
         Panel.SetZIndex(lamp, isLit ? 50 : 0);
     }
 
-    private void ShowControlInfo(string tagOrName)
+    private void ShowControlInfo(FrameworkElement? targetElement, string tagOrName)
     {
         if (_currentMode != "Free") return;
 
         var (title, subtitle, desc) = GetControlInfoText(tagOrName);
         TacticalInfoCard.SetInfo(title, subtitle, desc);
+
+        if (targetElement != null)
+        {
+            PositionInfoCardNear(targetElement);
+        }
+
         TacticalInfoCard.Visibility = Visibility.Visible;
+    }
+
+    private void PositionInfoCardNear(FrameworkElement target)
+    {
+        Point pos = target.TranslatePoint(new Point(0, 0), MainCanvas);
+
+        double targetWidth = target.ActualWidth > 0 ? target.ActualWidth : (double.IsNaN(target.Width) ? 60 : target.Width);
+        double targetHeight = target.ActualHeight > 0 ? target.ActualHeight : (double.IsNaN(target.Height) ? 60 : target.Height);
+
+        const double cardWidth = 440;
+        const double cardHeight = 220;
+        const double spacing = 20;
+
+        double cardX;
+        if ((pos.X + targetWidth + spacing + cardWidth) <= 1900)
+        {
+            cardX = pos.X + targetWidth + spacing;
+        }
+        else if ((pos.X - spacing - cardWidth) >= 20)
+        {
+            cardX = pos.X - spacing - cardWidth;
+        }
+        else
+        {
+            double spaceRight = 1920 - (pos.X + targetWidth);
+            double spaceLeft = pos.X;
+            cardX = spaceRight >= spaceLeft ? (pos.X + targetWidth + spacing) : (pos.X - cardWidth - spacing);
+        }
+
+        cardX = Math.Clamp(cardX, 20, 1920 - cardWidth - 20);
+
+        double cardY = pos.Y + (targetHeight / 2.0) - (cardHeight / 2.0);
+        cardY = Math.Clamp(cardY, 30, 1080 - cardHeight - 30);
+
+        Canvas.SetLeft(TacticalInfoCard, cardX);
+        Canvas.SetTop(TacticalInfoCard, cardY);
     }
 
     private void ToggleSwitch_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not ToggleButton toggle) return;
 
-        ShowControlInfo(toggle.Name);
+        ShowControlInfo(toggle, toggle.Name);
 
         if (toggle.Name == "TogglePanelLight")
         {
-            bool isNight = toggle.IsChecked == false;
+            bool isNight = toggle.IsChecked is false;
 
             var dimAnim = new DoubleAnimation
             {
@@ -132,14 +174,14 @@ public partial class MainWindow : Window
         string lampName = toggle.Name.Replace("Toggle", "LampTop");
         if (FindName(lampName) is Image lamp)
         {
-            UpdateLampVisual(lamp, toggle.IsChecked == true, isGreen: true);
+            UpdateLampVisual(lamp, toggle.IsChecked is true, isGreen: true);
         }
     }
 
     private void PushButton_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button btn) return;
-        ShowControlInfo(btn.Name);
+        ShowControlInfo(btn, btn.Name);
     }
 
     private BitmapImage GetCloseImage(string btnName)
@@ -166,7 +208,7 @@ public partial class MainWindow : Window
     private void ButtonArea_MouseDown(object sender, MouseButtonEventArgs e)
     {
         if (sender is not FrameworkElement el || el.Tag is not string btnName) return;
-        ShowControlInfo(btnName);
+        ShowControlInfo(el, btnName);
 
         bool isOpen = _capStates.GetValueOrDefault(btnName, false);
         if (!isOpen)
@@ -227,7 +269,7 @@ public partial class MainWindow : Window
     private void Sensor_MouseDown(object sender, MouseButtonEventArgs e)
     {
         if (sender is not FrameworkElement el || el.Tag is not string tag) return;
-        ShowControlInfo(tag);
+        ShowControlInfo(el, tag);
 
         if (_currentMode != "Free") return;
 
@@ -235,62 +277,55 @@ public partial class MainWindow : Window
         AnimateNeedlesRecursively(el, rand);
     }
 
-    private void AnimateNeedlesRecursively(DependencyObject parent, Random rand)
+    private static void AnimateNeedlesRecursively(DependencyObject parent, Random rand)
     {
-        if (parent is Panel panel)
-        {
-            foreach (UIElement child in panel.Children)
-            {
-                if (child is Image img && img.Name != null && img.Name.StartsWith("Needle") && img.RenderTransform is RotateTransform rotate)
-                {
-                    double targetAngle;
-                    if (img.Name == "NeedleTemperatureLeft")
-                    {
-                        targetAngle = rand.Next(40, 125);
-                    }
-                    else if (img.Name == "NeedleTemperatureRight")
-                    {
-                        targetAngle = rand.Next(-125, -40);
-                    }
-                    else if (img.Name == "NeedleAmmeter")
-                    {
-                        targetAngle = rand.Next(-30, 30);
-                    }
-                    else
-                    {
-                        targetAngle = rand.Next(-60, 60);
-                    }
+        if (parent is not Panel panel) return;
 
-                    var anim = new DoubleAnimation
-                    {
-                        To = targetAngle,
-                        Duration = TimeSpan.FromMilliseconds(450),
-                        EasingFunction = new BackEase { Amplitude = 0.35, EasingMode = EasingMode.EaseOut }
-                    };
-                    rotate.BeginAnimation(RotateTransform.AngleProperty, anim);
-                }
-                else
+        foreach (UIElement child in panel.Children)
+        {
+            if (child is Image { Name: not null } img && img.Name.StartsWith("Needle") && img.RenderTransform is RotateTransform rotate)
+            {
+                double targetAngle = img.Name switch
                 {
-                    AnimateNeedlesRecursively(child, rand);
-                }
+                    "NeedleTemperatureLeft" => rand.Next(40, 125),
+                    "NeedleTemperatureRight" => rand.Next(-125, -40),
+                    "NeedleAmmeter" => rand.Next(-30, 30),
+                    _ => rand.Next(-60, 60)
+                };
+
+                var anim = new DoubleAnimation
+                {
+                    To = targetAngle,
+                    Duration = TimeSpan.FromMilliseconds(450),
+                    EasingFunction = new BackEase { Amplitude = 0.35, EasingMode = EasingMode.EaseOut }
+                };
+                rotate.BeginAnimation(RotateTransform.AngleProperty, anim);
+            }
+            else
+            {
+                AnimateNeedlesRecursively(child, rand);
             }
         }
     }
 
-    private (string Title, string Subtitle, string Description) GetControlInfoText(string id)
+    private static (string Title, string Subtitle, string Description) GetControlInfoText(string id)
     {
         return id switch
         {
             "Ammeter" => ("АМПЕРМЕТР В-1", "Контроль тока", "Показывает силу зарядного или разрядного тока аккумуляторных батарей. При работающем двигателе стрелка должна находиться в плюсовой зоне."),
             "HourMeter" => ("СЧЕТЧИК МОТОЧАСОВ", "Учёт времени", "Регистрирует суммарное время работы двигателя в часах."),
-            "Turnover" => ("ТАХОМЕТР ТЭ-45", "Обороты двигателя", "Указывает частоту вращения коленчатого вала в сотнях об/мин. Нормальные обороты — 15-20 (1500-2000 об/мин)."),
-            "Speedometer" => ("СПИДОМЕТР", "Скорость и пробег", "Отображает текущую скорость движения машины (км/ч) и пройденный километраж."),
+            "Turnover" => ("ТАХОМЕТР ТЭ-48", "Обороты двигателя", "Указывает частоту вращения коленчатого вала в сотнях об/мин. Нормальные рабочие обороты — 15-20 (1500-2000 об/мин)."),
+            "Speedometer" => ("СПИДОМЕТР", "Скорость и пробег", "Отображает текущую скорость движения машины (км/ч) и суммарный пройденный километраж."),
             "Temperature" => ("ТЕРМОМЕТР ТУЭ-48", "Контроль температуры", "Отображает температуру охлаждающей жидкости (слева) и масла двигателя (справа)."),
-            "Oil" => ("МАСЛО ДВ.", "Давление масла двигателя", "Показывает давление в системе смазки двигателя. Нормальное значение — 4-5 кгс/см²."),
-            "Lubricant" => ("СМАЗКА КПП", "Давление смазки", "Отображает текущее давление масла в системе смазки коробки передач."),
-            
-            "TogglePanelLight" => ("ОСВЕЩЕНИЕ ЩИТКА", "Тумблер", "Включает ночную подсветку шкал приборов и затемняет панель для соблюдения светомаскировки."),
-            
+            "Oil" => ("МАСЛО ДВ.", "Давление масла двигателя", "Показывает давление в системе смазки двигателя. Нормальное рабочее значение — 4-5 кгс/см²."),
+            "Lubricant" => ("СМАЗКА КПП", "Давление смазки", "Отображает теку давление масла в системе смазки коробки передач."),
+            "TogglePanelLight" => ("ОСВЕЩЕНИЕ ЩИТКА", "Тумблер подсветки", "Включает ночную подсветку шкал приборов и затемняет панель для соблюдения светомаскировки."),
+            "Knob" => ("РЕГУЛЯТОР", "Реостат / потенциометр", "Плавная регулировка параметров и подсветки приборного щитка."),
+            "BtnDust" => ("ОТСОС ПЫЛИ", "Кнопка клапана", "Управляет электропневматическим клапаном отсоса пыли из воздухоочистителя."),
+            "BtnRed" => ("АВАРИЙНЫЙ ОСТАНОВ", "Кнопка", "Экстренная остановка двигателя при возникновении нештатных ситуаций."),
+            "BtnCapR1" => ("СТАРТЕР", "Кнопка под крышкой", "Включение стартер-генератора для пуска силовой установки."),
+            "BtnCapR2" => ("ПУСК ВОЗДУХОМ", "Кнопка под крышкой", "Подача сжатого воздуха из баллонов для пуска двигателя."),
+            "BtnMidR" => ("ОХЛАЖДЕНИЕ", "Кнопка включения", "Управление системой принудительного охлаждения двигателя."),
             _ => ("ЭЛЕМЕНТ УПРАВЛЕНИЯ", "Система БМП-2", "Интерактивный элемент щитка механика-водителя.")
         };
     }
@@ -298,7 +333,7 @@ public partial class MainWindow : Window
     private void Knob_MouseDown(object sender, MouseButtonEventArgs e)
     {
         if (sender is not FrameworkElement el) return;
-        ShowControlInfo("Knob");
+        ShowControlInfo(el, "Knob");
 
         _activeKnob = el;
         _lastKnobMousePos = e.GetPosition(this);
@@ -331,7 +366,7 @@ public partial class MainWindow : Window
 
         _activeKnob = null;
     }
-    
+
     private void BtnAbout_Click(object sender, RoutedEventArgs e)
     {
         var aboutWindow = new AboutWindow
