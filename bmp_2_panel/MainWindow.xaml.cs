@@ -16,7 +16,10 @@ public partial class MainWindow
 {
     private string _currentMode = "";
 
-    private readonly Dictionary<string, bool> _capStates = [];
+    private List<TutorialStep> _currentTutorial = new List<TutorialStep>();
+    private int _tutorialStepIndex;
+
+    private readonly Dictionary<string, bool> _capStates = new Dictionary<string, bool>();
     private readonly BitmapImage _imgCapClose = new(new Uri("/bmp_2_panel;component/assets/buttons/cap_close.png", UriKind.Relative));
     private readonly BitmapImage _imgCapClose1B = new(new Uri("/bmp_2_panel;component/assets/buttons/cap_close_1b.png", UriKind.Relative));
     private readonly BitmapImage _imgCapClose2B = new(new Uri("/bmp_2_panel;component/assets/buttons/cap_close_2b.png", UriKind.Relative));
@@ -31,10 +34,94 @@ public partial class MainWindow
     private FrameworkElement? _activeKnob;
     private Point _lastKnobMousePos;
 
+    private class TutorialStep
+    {
+        public string TargetControlName { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string Subtitle { get; set; } = "";
+        public string Description { get; set; } = "";
+    }
+
     public MainWindow()
     {
         InitializeComponent();
         AttachDynamicHandlers();
+
+        Loaded += (s, e) => ResetPanelState();
+
+        EventManager.RegisterClassHandler(typeof(UIElement), PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(GlobalClickFilter));
+    }
+
+    private void GlobalClickFilter(object sender, MouseButtonEventArgs e)
+    {
+        if (_currentMode == "Free" || _currentMode == "") return;
+
+        if (e.OriginalSource is DependencyObject el)
+        {
+            var parentBtn = FindParent<Button>(el);
+            if (parentBtn != null && (parentBtn.Name == "BtnAbout" || parentBtn.Name == "BtnExit" || parentBtn.Name == "BtnModeSelect" || parentBtn.Content?.ToString() == "СМЕНИТЬ РЕЖИМ"))
+            {
+                return;
+            }
+
+            var parentBorder = FindParent<Border>(el);
+            if (parentBorder != null && (parentBorder.Name == "MainMenuOverlay" || parentBorder.Name == "TopHud"))
+            {
+                return;
+            }
+
+            if (_tutorialStepIndex >= _currentTutorial.Count)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            string targetName = _currentTutorial[_tutorialStepIndex].TargetControlName;
+
+            if (targetName == "Intro")
+            {
+                AdvanceTutorial("Intro");
+                e.Handled = true;
+                return;
+            }
+
+            if (IsTargetOrChild(el, targetName))
+            {
+                return;
+            }
+        }
+
+        e.Handled = true;
+    }
+
+    private bool IsTargetOrChild(DependencyObject child, string targetName)
+    {
+        DependencyObject? current = child;
+        while (current != null)
+        {
+            if (current is FrameworkElement fe)
+            {
+                if (fe.Name == targetName || fe.Tag?.ToString() == targetName) return true;
+                if (fe.Name != null && "Cover" + fe.Name == targetName) return true;
+                if (fe.Tag != null && "Cover" + fe.Tag?.ToString() == targetName) return true;
+            }
+
+            DependencyObject parent = VisualTreeHelper.GetParent(current);
+            if (parent == null && current is FrameworkElement fwElement)
+            {
+                parent = fwElement.Parent;
+            }
+            current = parent;
+        }
+        return false;
+    }
+
+    private T? FindParent<T>(DependencyObject child) where T : DependencyObject
+    {
+        DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+        if (parentObject == null) return null;
+        if (parentObject is T parent) return parent;
+        return FindParent<T>(parentObject);
     }
 
     private void AttachDynamicHandlers()
@@ -80,7 +167,7 @@ public partial class MainWindow
         string toggleName = lamp.Name.Replace("LampTop", "Toggle");
         if (FindName(toggleName) is ToggleButton toggle)
         {
-            shouldBeOn = toggle.IsChecked is true;
+            shouldBeOn = toggle.IsChecked == true;
         }
 
         UpdateLampVisual(lamp, shouldBeOn, isGreenLamp);
@@ -91,21 +178,234 @@ public partial class MainWindow
         if (sender is not Button btn || btn.Tag is not string modeTag) return;
 
         _currentMode = modeTag;
+        _tutorialStepIndex = 0;
+        _currentTutorial.Clear();
+        TargetHighlighter.Visibility = Visibility.Collapsed;
 
-        TxtCurrentMode.Text = modeTag switch
+        ResetPanelState();
+
+        switch (modeTag)
         {
-            "Free" => "СВОБОДНОЕ ОЗНАКОМЛЕНИЕ",
-            "Normal" => "ШТАТНЫЙ ПУСК ДВИГАТЕЛЯ",
-            "Pump" => "ПУСК ДВИГАТЕЛЯ С ПОДКАЧКОЙ",
-            _ => "НЕИЗВЕСТНЫЙ РЕЖИМ"
-        };
+            case "Free":
+                TxtCurrentMode.Text = "СВОБОДНОЕ ОЗНАКОМЛЕНИЕ";
+                TacticalInfoCard.Visibility = Visibility.Collapsed;
+                break;
+            case "Normal":
+                TxtCurrentMode.Text = "ШТАТНЫЙ ПУСК ДВИГАТЕЛЯ";
+                LoadNormalStartTutorial();
+                ShowCurrentTutorialStep();
+                break;
+            case "Pump":
+                TxtCurrentMode.Text = "ПУСК ДВИГАТЕЛЯ С ПОДКАЧКОЙ";
+                LoadPumpStartTutorial();
+                ShowCurrentTutorialStep();
+                break;
+            case "Winter":
+                TxtCurrentMode.Text = "ЗИМНИЙ ПУСК С ПОДОГРЕВОМ";
+                LoadWinterStartTutorial();
+                ShowCurrentTutorialStep();
+                break;
+        }
 
         MainMenuOverlay.Visibility = Visibility.Collapsed;
         TopHud.Visibility = Visibility.Visible;
     }
 
+    private void ResetPanelState()
+    {
+        ToggleButton[] toggles = { ToggleL1, ToggleL2, ToggleL3, ToggleL4, ToggleL5, ToggleL6, ToggleL7, ToggleL8,
+                                   ToggleR1, ToggleR2, ToggleR3, ToggleR4, ToggleR5, ToggleR6, ToggleR7, ToggleR8 };
+        foreach (var t in toggles)
+        {
+            t.IsChecked = false;
+            string lampName = t.Name.Replace("Toggle", "LampTop");
+            if (FindName(lampName) is Image lamp)
+            {
+                UpdateLampVisual(lamp, false, true);
+            }
+        }
+
+        TogglePanelLight.IsChecked = true;
+        NightDimOverlay.BeginAnimation(UIElement.OpacityProperty, null);
+        NightDimOverlay.Opacity = 0;
+
+        if (FindName("SensorHourMeterBright") is Image hm) { hm.BeginAnimation(UIElement.OpacityProperty, null); hm.Opacity = 0; }
+        if (FindName("SensorAmmeterBright") is Image am) { am.BeginAnimation(UIElement.OpacityProperty, null); am.Opacity = 0; }
+        if (FindName("SensorTurnoverBright") is Image to) { to.BeginAnimation(UIElement.OpacityProperty, null); to.Opacity = 0; }
+        if (FindName("SensorSpeedometerBright") is Image sm) { sm.BeginAnimation(UIElement.OpacityProperty, null); sm.Opacity = 0; }
+        if (FindName("SensorTemperatureBright") is Image tm) { tm.BeginAnimation(UIElement.OpacityProperty, null); tm.Opacity = 0; }
+        if (FindName("SensorOilBright") is Image om) { om.BeginAnimation(UIElement.OpacityProperty, null); om.Opacity = 0; }
+        if (FindName("SensorLubricantBright") is Image lm) { lm.BeginAnimation(UIElement.OpacityProperty, null); lm.Opacity = 0; }
+
+        _capStates.Clear();
+        string[] coverNames = { "CoverBtn1B", "CoverBtn2B", "CoverBtnL1", "CoverBtnL2", "CoverBtnL3", "CoverBtnR3" };
+        foreach (var c in coverNames)
+        {
+            UpdateCapVisual(c, GetCloseImage(c));
+        }
+
+        if (NeedleTemperatureLeft.RenderTransform is RotateTransform r1) { r1.BeginAnimation(RotateTransform.AngleProperty, null); r1.Angle = 140; }
+        if (NeedleTemperatureRight.RenderTransform is RotateTransform r2) { r2.BeginAnimation(RotateTransform.AngleProperty, null); r2.Angle = -140; }
+        if (NeedleAmmeter.RenderTransform is RotateTransform r3) { r3.BeginAnimation(RotateTransform.AngleProperty, null); r3.Angle = -30; }
+        if (NeedleTurnover.RenderTransform is RotateTransform r4) { r4.BeginAnimation(RotateTransform.AngleProperty, null); r4.Angle = -165; }
+        if (NeedleSpeedometer.RenderTransform is RotateTransform r5) { r5.BeginAnimation(RotateTransform.AngleProperty, null); r5.Angle = -100; }
+        if (NeedleOil.RenderTransform is RotateTransform r6) { r6.BeginAnimation(RotateTransform.AngleProperty, null); r6.Angle = -85; }
+        if (NeedleLubricant.RenderTransform is RotateTransform r7) { r7.BeginAnimation(RotateTransform.AngleProperty, null); r7.Angle = -85; }
+    }
+
+    private void LoadNormalStartTutorial()
+    {
+        _currentTutorial = new List<TutorialStep>
+        {
+            new TutorialStep { TargetControlName = "Intro", Title = "ШАГ 1: ВВОДНАЯ ПОДГОТОВКА", Subtitle = "Внешние системы машины", Description = "Убедитесь, что рычаг КП в нейтрали, открыт топливный кран и выжата педаль главного фрикциона.\n\n(Кликните в любом месте экрана для продолжения)" },
+            new TutorialStep { TargetControlName = "ToggleR8", Title = "ШАГ 2: ВЫКЛЮЧАТЕЛЬ БАТАРЕЙ", Subtitle = "Включение бортовой сети", Description = "Включите аккумуляторные батареи. Амперметр должен показать наличие напряжения." },
+            new TutorialStep { TargetControlName = "CoverBtnL3", Title = "ШАГ 3: ПРОКАЧКА СИСТЕМЫ", Subtitle = "Маслозакачивающий насос", Description = "Откройте крышку и нажмите кнопку МЗН для прокачки системы смазки. Держите до создания давления 2-2.5 кгс/см²." },
+            new TutorialStep { TargetControlName = "BtnCapR2", Title = "ШАГ 4: ОСНОВНОЙ ПУСК", Subtitle = "Пуск воздухом", Description = "Нажмите кнопку пуска воздухом. Это основной способ пуска БМП-2, сберегающий батареи." },
+            new TutorialStep { TargetControlName = "BtnCapR1", Title = "ШАГ 5: КОМБИНИРОВАННЫЙ ПУСК", Subtitle = "Стартер", Description = "Дополнительно нажмите стартер для уверенного запуска. Двигатель выйдет на обороты холостого хода." }
+        };
+    }
+
+    private void LoadPumpStartTutorial()
+    {
+        _currentTutorial = new List<TutorialStep>
+        {
+            new TutorialStep { TargetControlName = "Intro", Title = "ШАГ 1: ВВОДНАЯ ПОДГОТОВКА", Subtitle = "Внешние системы машины", Description = "Убедитесь, что рычаг КП в нейтрали, открыт топливный кран и выжата педаль главного фрикциона.\n\n(Кликните в любом месте экрана для продолжения)" },
+            new TutorialStep { TargetControlName = "ToggleR8", Title = "ШАГ 2: ВЫКЛЮЧАТЕЛЬ БАТАРЕЙ", Subtitle = "Включение бортовой сети", Description = "Переведите тумблер вверх для подключения батарей." },
+            new TutorialStep { TargetControlName = "ToggleL4", Title = "ШАГ 3: ПОДКАЧКА ТОПЛИВА", Subtitle = "Включение БЦН", Description = "Включите насос БЦН на 10-15 сек для удаления воздушных пробок в топливной системе." },
+            new TutorialStep { TargetControlName = "CoverBtnL3", Title = "ШАГ 4: МАСЛОЗАКАЧИВАЮЩИЙ НАСОС", Subtitle = "Прокачка маслом", Description = "Создайте начальное давление масла в системе дизеля перед пуском." },
+            new TutorialStep { TargetControlName = "BtnCapR1", Title = "ШАГ 5: ДУБЛИРУЮЩИЙ ПУСК", Subtitle = "Пуск стартером", Description = "Запустите двигатель электростартером С5-2С." },
+            new TutorialStep { TargetControlName = "ToggleL4", Title = "ШАГ 6: ОТКЛЮЧЕНИЕ БЦН", Subtitle = "Переход в штатный режим", Description = "После устойчивой работы двигателя выключите топливный насос БЦН." }
+        };
+    }
+
+    private void LoadWinterStartTutorial()
+    {
+        _currentTutorial = new List<TutorialStep>
+        {
+            new TutorialStep { TargetControlName = "Intro", Title = "ШАГ 1: ВВОДНАЯ ПОДГОТОВКА", Subtitle = "Внешние системы машины", Description = "Убедитесь, что рычаг КП в нейтрали, открыт топливный кран и выжата педаль главного фрикциона.\n\n(Кликните в любом месте экрана для продолжения)" },
+            new TutorialStep { TargetControlName = "ToggleR8", Title = "ШАГ 2: БОРТОВАЯ СЕТЬ", Subtitle = "Включение батарей", Description = "Включите питание перед запуском подогревателя." },
+            new TutorialStep { TargetControlName = "ToggleR5", Title = "ШАГ 3: СВЕЧА ПОДОГРЕВАТЕЛЯ", Subtitle = "Накал свечи", Description = "Подайте питание на свечу для воспламенения топлива в котле." },
+            new TutorialStep { TargetControlName = "ToggleR6", Title = "ШАГ 4: ОБОГРЕВ ДВИГАТЕЛЯ", Subtitle = "Запуск котла", Description = "Включите насосный узел котла-подогревателя. Ожидайте разогрева ОЖ до +30°C." },
+            new TutorialStep { TargetControlName = "ToggleR5", Title = "ШАГ 5: ОТКЛЮЧЕНИЕ СВЕЧИ", Subtitle = "Прекращение накала", Description = "После воспламенения топлива выключите свечу." },
+            new TutorialStep { TargetControlName = "ToggleR6", Title = "ШАГ 6: ОТКЛЮЧЕНИЕ ОБОГРЕВА", Subtitle = "Двигатель прогрет", Description = "Выключите подогреватель после достижения рабочей температуры." },
+            new TutorialStep { TargetControlName = "CoverBtnL3", Title = "ШАГ 7: ПРОКАЧКА МАСЛОМ", Subtitle = "Подготовка к пуску", Description = "Прокачайте систему смазки перед запуском." },
+            new TutorialStep { TargetControlName = "BtnCapR2", Title = "ШАГ 8: ПУСК ВОЗДУХОМ", Subtitle = "Пневмопуск", Description = "Нажмите пуск воздухом (первая фаза комбинированного пуска)." },
+            new TutorialStep { TargetControlName = "BtnCapR1", Title = "ШАГ 9: КОМБИНИРОВАННЫЙ ПУСК", Subtitle = "Стартер", Description = "Нажмите кнопку стартера в дополнение к воздуху. После выхода на 600-800 об/мин двигатель запущен." }
+        };
+    }
+
+    private void ShowCurrentTutorialStep()
+    {
+        if (_tutorialStepIndex >= _currentTutorial.Count)
+        {
+            TacticalInfoCard.SetInfo("СЦЕНАРИЙ ЗАВЕРШЕН", "Двигатель успешно запущен", "Выполнены все действия согласно инструкции по эксплуатации БМП-2.");
+            TacticalInfoCard.Visibility = Visibility.Visible;
+            Canvas.SetLeft(TacticalInfoCard, 1920 / 2.0 - 220);
+            Canvas.SetTop(TacticalInfoCard, 100);
+            TargetHighlighter.Visibility = Visibility.Collapsed;
+            
+            StartEngineAnimation();
+            return;
+        }
+
+        var step = _currentTutorial[_tutorialStepIndex];
+        TacticalInfoCard.SetInfo(step.Title, step.Subtitle, step.Description);
+
+        if (step.TargetControlName == "Intro")
+        {
+            TargetHighlighter.Visibility = Visibility.Collapsed;
+            Canvas.SetLeft(TacticalInfoCard, 1920 / 2.0 - 220);
+            Canvas.SetTop(TacticalInfoCard, 200);
+        }
+        else
+        {
+            FrameworkElement? targetEl = FindName(step.TargetControlName) as FrameworkElement 
+                                         ?? FindName("Cover" + step.TargetControlName.Replace("Cover", "")) as FrameworkElement;
+
+            if (targetEl != null)
+            {
+                PositionInfoCardNear(targetEl);
+                PositionHighlighter(targetEl);
+            }
+        }
+
+        TacticalInfoCard.Visibility = Visibility.Visible;
+    }
+
+    private void StartEngineAnimation()
+    {
+        AnimateNeedleRunning(NeedleTurnover, -60, -25, 1.5); 
+        AnimateNeedleRunning(NeedleOil, -35, 10, 1.0);       
+        AnimateNeedleRunning(NeedleLubricant, -40, 5, 1.0);  
+        AnimateNeedleRunning(NeedleAmmeter, -20, 15, 0.8);   
+        AnimateNeedleRunning(NeedleTemperatureLeft, 70, 45, 0.5); 
+        AnimateNeedleRunning(NeedleTemperatureRight, -70, -45, 0.5); 
+        AnimateNeedleRunning(NeedleSpeedometer, -100, -45, 0.3); 
+    }
+
+    private void AnimateNeedleRunning(Image needle, double fromAngle, double toAngle, double jitterAmp)
+    {
+        if (needle.RenderTransform is not RotateTransform rotate) return;
+
+        DoubleAnimation startupAnim = new DoubleAnimation
+        {
+            From = fromAngle,
+            To = toAngle,
+            Duration = TimeSpan.FromMilliseconds(2000),
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+        };
+
+        startupAnim.Completed += (s, e) =>
+        {
+            if (_currentMode != "" && _currentMode != "Free")
+            {
+                DoubleAnimation jitter = new DoubleAnimation
+                {
+                    From = toAngle - jitterAmp,
+                    To = toAngle + jitterAmp,
+                    Duration = TimeSpan.FromMilliseconds(70),
+                    AutoReverse = true,
+                    RepeatBehavior = RepeatBehavior.Forever
+                };
+                rotate.BeginAnimation(RotateTransform.AngleProperty, jitter);
+            }
+        };
+
+        rotate.BeginAnimation(RotateTransform.AngleProperty, startupAnim);
+    }
+
+    private void PositionHighlighter(FrameworkElement target)
+    {
+        Point pos = target.TranslatePoint(new Point(0, 0), MainCanvas);
+        
+        double width = target.ActualWidth > 0 ? target.ActualWidth : (double.IsNaN(target.Width) ? 60 : target.Width);
+        double height = target.ActualHeight > 0 ? target.ActualHeight : (double.IsNaN(target.Height) ? 60 : target.Height);
+
+        TargetHighlighter.Width = width + 12;
+        TargetHighlighter.Height = height + 12;
+        Canvas.SetLeft(TargetHighlighter, pos.X - 6);
+        Canvas.SetTop(TargetHighlighter, pos.Y - 6);
+        
+        TargetHighlighter.Visibility = Visibility.Visible;
+    }
+
+    private void AdvanceTutorial(string actionedControlName)
+    {
+        if (_currentMode == "Free" || _tutorialStepIndex >= _currentTutorial.Count) return;
+
+        if (_currentTutorial[_tutorialStepIndex].TargetControlName == actionedControlName ||
+            ("Cover" + actionedControlName) == _currentTutorial[_tutorialStepIndex].TargetControlName ||
+            actionedControlName.Replace("Cover", "") == _currentTutorial[_tutorialStepIndex].TargetControlName)
+        {
+            _tutorialStepIndex++;
+            ShowCurrentTutorialStep();
+        }
+    }
+
     private void BtnShowMenu_Click(object sender, RoutedEventArgs e)
     {
+        _currentMode = "";
+        TargetHighlighter.Visibility = Visibility.Collapsed;
         MainMenuOverlay.Visibility = Visibility.Visible;
         TopHud.Visibility = Visibility.Collapsed;
         TacticalInfoCard.Visibility = Visibility.Collapsed;
@@ -193,11 +493,18 @@ public partial class MainWindow
     {
         if (sender is not ToggleButton toggle) return;
 
-        ShowControlInfo(toggle, toggle.Name);
+        if (_currentMode == "Free")
+        {
+            ShowControlInfo(toggle, toggle.Name);
+        }
+        else
+        {
+            AdvanceTutorial(toggle.Name);
+        }
 
         if (toggle.Name == "TogglePanelLight")
         {
-            bool isNight = toggle.IsChecked is false;
+            bool isNight = toggle.IsChecked == false;
 
             var dimAnim = new DoubleAnimation
             {
@@ -225,14 +532,22 @@ public partial class MainWindow
         string lampName = toggle.Name.Replace("Toggle", "LampTop");
         if (FindName(lampName) is Image lamp)
         {
-            UpdateLampVisual(lamp, toggle.IsChecked is true, isGreen: true);
+            UpdateLampVisual(lamp, toggle.IsChecked == true, isGreen: true);
         }
     }
 
     private void PushButton_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button btn) return;
-        ShowControlInfo(btn, btn.Name);
+
+        if (_currentMode == "Free")
+        {
+            ShowControlInfo(btn, btn.Name);
+        }
+        else
+        {
+            AdvanceTutorial(btn.Name);
+        }
     }
 
     private BitmapImage GetCloseImage(string btnName)
@@ -259,14 +574,22 @@ public partial class MainWindow
     private void ButtonArea_MouseDown(object sender, MouseButtonEventArgs e)
     {
         if (sender is not FrameworkElement el || el.Tag is not string btnName) return;
-        ShowControlInfo(el, btnName);
 
         bool isOpen = _capStates.GetValueOrDefault(btnName, false);
         if (!isOpen)
         {
             _capStates[btnName] = true;
             UpdateCapVisual(btnName, _imgCapOpen);
-            return;
+            return; 
+        }
+
+        if (_currentMode == "Free")
+        {
+            ShowControlInfo(el, btnName);
+        }
+        else
+        {
+            AdvanceTutorial(btnName);
         }
 
         el.CaptureMouse();
@@ -320,15 +643,16 @@ public partial class MainWindow
     private void Sensor_MouseDown(object sender, MouseButtonEventArgs e)
     {
         if (sender is not FrameworkElement el || el.Tag is not string tag) return;
-        ShowControlInfo(el, tag);
 
-        if (_currentMode != "Free") return;
-
-        var rand = new Random();
-        AnimateNeedlesRecursively(el, rand);
+        if (_currentMode == "Free")
+        {
+            ShowControlInfo(el, tag);
+            var rand = new Random();
+            AnimateNeedlesRecursively(el, rand);
+        }
     }
 
-    private static void AnimateNeedlesRecursively(DependencyObject parent, Random rand)
+    private void AnimateNeedlesRecursively(DependencyObject parent, Random rand)
     {
         if (parent is not Panel panel) return;
 
@@ -336,19 +660,37 @@ public partial class MainWindow
         {
             if (child is Image { Name: not null } img && img.Name.StartsWith("Needle") && img.RenderTransform is RotateTransform rotate)
             {
+                double baseAngle = img.Name switch
+                {
+                    "NeedleTemperatureLeft" => 70,
+                    "NeedleTemperatureRight" => -70,
+                    "NeedleAmmeter" => -20,
+                    "NeedleTurnover" => -60,
+                    "NeedleSpeedometer" => -100,
+                    "NeedleOil" => -35,
+                    "NeedleLubricant" => -40,
+                    _ => 0
+                };
+
                 double targetAngle = img.Name switch
                 {
-                    "NeedleTemperatureLeft" => rand.Next(40, 125),
-                    "NeedleTemperatureRight" => rand.Next(-125, -40),
-                    "NeedleAmmeter" => rand.Next(-30, 30),
+                    "NeedleTemperatureLeft" => rand.Next(80, 125),
+                    "NeedleTemperatureRight" => rand.Next(-125, -80),
+                    "NeedleAmmeter" => rand.Next(10, 30),
+                    "NeedleTurnover" => rand.Next(-20, 20),
+                    "NeedleSpeedometer" => rand.Next(-45, 90),
+                    "NeedleOil" => rand.Next(0, 25),
+                    "NeedleLubricant" => rand.Next(0, 25),
                     _ => rand.Next(-60, 60)
                 };
 
                 var anim = new DoubleAnimation
                 {
+                    From = baseAngle,
                     To = targetAngle,
-                    Duration = TimeSpan.FromMilliseconds(450),
-                    EasingFunction = new BackEase { Amplitude = 0.35, EasingMode = EasingMode.EaseOut }
+                    Duration = TimeSpan.FromMilliseconds(1000),
+                    AutoReverse = true,
+                    EasingFunction = new ElasticEase { Oscillations = 1, Springiness = 5, EasingMode = EasingMode.EaseOut }
                 };
                 rotate.BeginAnimation(RotateTransform.AngleProperty, anim);
             }
@@ -370,7 +712,7 @@ public partial class MainWindow
             "Temperature" => ("ТЕРМОМЕТР ТУЭ-48", "Контроль температуры", "Двойной указатель: отображает температуру охлаждающей жидкости (слева) и масла двигателя (справа)."),
             "Oil" => ("МАСЛО ДВ.", "Давление масла двигателя", "Показывает давление в системе смазки дизеля. Нормальное эксплуатационное значение — 4-5 кгс/см²."),
             "Lubricant" => ("СМАЗКА КПП", "Давление смазки", "Отображает текущее давление масла в системе смазки силовой передачи (коробки передач)."),
-            
+
             "ToggleL1" => ("ВЫХОД ЗА ГАБАРИТ", "Сигнализация", "Включение системы звуковой и световой сигнализации при выходе вооружения за безопасные габариты машины."),
             "ToggleL2" => ("ТДА", "Термодымовая аппаратура", "Включение насоса ТДА многократного действия для впрыска топлива в выпускной коллектор и постановки плотной дымовой завесы."),
             "ToggleL3" => ("ГПК", "Гирополукомпас", "Включение питания электрического гирополукомпаса (ГПК-59) для ориентирования на местности и выдерживания курса."),
@@ -405,7 +747,7 @@ public partial class MainWindow
             "BtnDust" => ("КЛАПАН ОТСОСА ПЫЛИ", "Воздухоочиститель", "Управление электропневматическим клапаном эжекционного автоматического отсоса пыли из бескассетного воздухоочистителя."),
             "BtnMidR" => ("ПНЕВМООБОРУДОВАНИЕ", "Управление клапанами", "Управление воздушными магистралями и автоматом давления (АДУ-2С) бортовой пневмосистемы."),
             "Knob" => ("АЗС", "Автомат защиты сети", "Автомат защиты сети (предохранитель на 5А или 10А) для предотвращения коротких замыканий и перегрузок в электроцепях машины."),
-            
+
             var s when s.StartsWith("LampTopL") && s.Length > 8 => ("СИГНАЛЬНАЯ ЛАМПА", "Индикация включения", "Подтверждает подачу питания на соответствующую систему левого борта (БЦН, ТДА, ПАЗ и др.)."),
             var s when s.StartsWith("LampTopR") && s.Length > 8 => ("СИГНАЛЬНАЯ ЛАМПА", "Индикация включения", "Подтверждает подачу питания на соответствующую систему правого борта (фары, нагнетатель, подогрев и др.)."),
             "LampTopL" => ("АВАРИЙНАЯ ЛАМПА", "Внимание", "Красная контрольная лампа. Загорается при возникновении критических ошибок или выходе вооружения за габарит."),

@@ -21,6 +21,25 @@
             <Setter Property="IsHitTestVisible" Value="False"/>
         </Style>
 
+        <!-- Пульсирующая обводка целевого элемента -->
+        <Style x:Key="TargetHighlightBorder" TargetType="Border">
+            <Setter Property="BorderThickness" Value="4"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="BorderBrush" Value="#40C057"/>
+            <Setter Property="Background" Value="#2240C057"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+            <Setter Property="Panel.ZIndex" Value="100"/>
+            <Style.Triggers>
+                <EventTrigger RoutedEvent="Loaded">
+                    <BeginStoryboard>
+                        <Storyboard RepeatBehavior="Forever">
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1.0" To="0.3" Duration="0:0:0.8" AutoReverse="True"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="MilitaryToggle2Pos" TargetType="ToggleButton">
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Background" Value="Transparent"/>
@@ -444,6 +463,9 @@
                     </Rectangle.Fill>
                 </Rectangle>
 
+                <!-- Индикатор целевого элемента -->
+                <Border x:Name="TargetHighlighter" Style="{StaticResource TargetHighlightBorder}" Visibility="Collapsed"/>
+
                 <Image x:Name="LampTopL" 
                        Source="/bmp_2_panel;component/assets/lights/red.png" 
                        Width="70" Height="70" 
@@ -816,7 +838,7 @@
                        Panel.ZIndex="31" 
                        Style="{StaticResource SensorBrightOverlay}"/>
 
-                <!-- Амперметр (без накладных винтов) -->
+                <!-- Амперметр -->
                 <Grid Canvas.Left="300" Canvas.Top="705" Width="190" Height="190" Panel.ZIndex="30" Cursor="Hand" Tag="Ammeter" MouseLeftButtonDown="Sensor_MouseDown">
                     <Image x:Name="SensorAmmeter" Source="/bmp_2_panel;component/assets/sensors/ammeter.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image x:Name="SensorAmmeterBright" Source="/bmp_2_panel;component/assets/sensors/ammeter_bright.png" Style="{StaticResource SensorBrightOverlay}"/>
@@ -835,10 +857,10 @@
                 <!-- Тахометр (ТЭ-48) -->
                 <Grid Canvas.Left="540" Canvas.Top="670" Width="230" Height="230" Panel.ZIndex="30" Cursor="Hand" Tag="Turnover" MouseLeftButtonDown="Sensor_MouseDown">
                     <Image x:Name="SensorTurnover" Source="/bmp_2_panel;component/assets/sensors/turnover.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="22,22,0,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="18" Height="18" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,22,22,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="22,0,0,22" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="18" Height="18" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,22,22" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="25,25,0,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="18" Height="18" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,25,25,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="25,0,0,25" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="18" Height="18" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,25,25" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image x:Name="SensorTurnoverBright" Source="/bmp_2_panel;component/assets/sensors/turnover_bright.png" Style="{StaticResource SensorBrightOverlay}"/>
                     
                     <Canvas Width="230" Height="230" Panel.ZIndex="45">
@@ -871,10 +893,10 @@
                 <!-- Термометр ТУЭ-48 -->
                 <Grid Canvas.Left="1150" Canvas.Top="673" Width="230" Height="230" Panel.ZIndex="30" Cursor="Hand" Tag="Temperature" MouseLeftButtonDown="Sensor_MouseDown">
                     <Image x:Name="SensorTemperature" Source="/bmp_2_panel;component/assets/sensors/temperature.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="22,22,0,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="18" Height="18" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,22,22,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="22,0,0,22" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="18" Height="18" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,22,22" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="25,25,0,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="18" Height="18" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,25,25,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="18" Height="18" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="25,0,0,25" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="18" Height="18" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,25,25" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image x:Name="SensorTemperatureBright" Source="/bmp_2_panel;component/assets/sensors/temperature_bright.png" Style="{StaticResource SensorBrightOverlay}"/>
                     
                     <Canvas Width="230" Height="230" Panel.ZIndex="45">
@@ -901,10 +923,10 @@
                 <!-- Масло ДВ -->
                 <Grid Canvas.Left="1425" Canvas.Top="703" Width="200" Height="200" Panel.ZIndex="30" Cursor="Hand" Tag="Oil" MouseLeftButtonDown="Sensor_MouseDown">
                     <Image x:Name="SensorOil" Source="/bmp_2_panel;component/assets/sensors/oil.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="16" Height="16" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="22,22,0,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,22,22,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="16" Height="16" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="22,0,0,22" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,22,22" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="16" Height="16" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="24,24,0,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,24,24,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="16" Height="16" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="24,0,0,24" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,24,24" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image x:Name="SensorOilBright" Source="/bmp_2_panel;component/assets/sensors/oil_bright.png" Style="{StaticResource SensorBrightOverlay}"/>
                     
                     <Canvas Width="200" Height="200" Panel.ZIndex="45">
@@ -921,10 +943,10 @@
                 <!-- Смазка КПП -->
                 <Grid Canvas.Left="1665" Canvas.Top="705" Width="200" Height="200" Panel.ZIndex="30" Cursor="Hand" Tag="Lubricant" MouseLeftButtonDown="Sensor_MouseDown">
                     <Image x:Name="SensorLubricant" Source="/bmp_2_panel;component/assets/sensors/lubricant.png" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="16" Height="16" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="22,22,0,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,22,24,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="16" Height="16" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="22,0,0,22" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,22,22" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="16" Height="16" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="24,24,0,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,24,24,0" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw.png" Width="16" Height="16" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="24,0,0,24" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/bmp_2_panel;component/assets/background/screw_round.png" Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,24,24" Panel.ZIndex="50" IsHitTestVisible="False" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Image x:Name="SensorLubricantBright" Source="/bmp_2_panel;component/assets/sensors/lubricant_bright.png" Style="{StaticResource SensorBrightOverlay}"/>
                     
                     <Canvas Width="200" Height="200" Panel.ZIndex="45">
@@ -991,7 +1013,8 @@
                             
                             <Button Content="СВОБОДНОЕ ОЗНАКОМЛЕНИЕ" Style="{StaticResource MilitarySystemBtn}" Height="55" Margin="0,0,0,15" Tag="Free" Click="BtnModeSelect_Click"/>
                             <Button Content="ШТАТНЫЙ ПУСК ДВИГАТЕЛЯ" Style="{StaticResource MilitarySystemBtn}" Height="55" Margin="0,0,0,15" Tag="Normal" Click="BtnModeSelect_Click"/>
-                            <Button Content="ПУСК ДВИГАТЕЛЯ С ПОДКАЧКОЙ" Style="{StaticResource MilitarySystemBtn}" Height="55" Margin="0,0,0,30" Tag="Pump" Click="BtnModeSelect_Click"/>
+                            <Button Content="ПУСК ДВИГАТЕЛЯ С ПОДКАЧКОЙ" Style="{StaticResource MilitarySystemBtn}" Height="55" Margin="0,0,0,15" Tag="Pump" Click="BtnModeSelect_Click"/>
+                            <Button Content="ЗИМНИЙ ПУСК С ПОДОГРЕВОМ" Style="{StaticResource MilitarySystemBtn}" Height="55" Margin="0,0,0,30" Tag="Winter" Click="BtnModeSelect_Click"/>
 
                             <Border Height="1" Background="#383D42" Margin="0,0,0,25"/>
 
