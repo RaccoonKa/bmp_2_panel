@@ -33,6 +33,7 @@ public partial class MainWindow
 
     private FrameworkElement? _activeKnob;
     private Point _lastKnobMousePos;
+    private double _accumulatedRotation = 0; // Переменная для отслеживания степени "откручивания"
 
     private class TutorialStep
     {
@@ -59,13 +60,13 @@ public partial class MainWindow
         if (e.OriginalSource is DependencyObject el)
         {
             var parentBtn = FindParent<Button>(el);
-            if (parentBtn != null && (parentBtn.Name == "BtnAbout" || parentBtn.Name == "BtnExit" || parentBtn.Name == "BtnModeSelect" || parentBtn.Content?.ToString() == "СМЕНИТЬ РЕЖИМ"))
+            if (parentBtn != null && (parentBtn.Name == "BtnAbout" || parentBtn.Name == "BtnExit" || parentBtn.Name == "BtnModeSelect" || parentBtn.Content?.ToString() == "СМЕНИТЬ РЕЖИМ" || parentBtn.Content?.ToString() == "ЗАКРЫТЬ КРЫШКУ"))
             {
                 return;
             }
 
             var parentBorder = FindParent<Border>(el);
-            if (parentBorder != null && (parentBorder.Name == "MainMenuOverlay" || parentBorder.Name == "TopHud"))
+            if (parentBorder != null && (parentBorder.Name == "MainMenuOverlay" || parentBorder.Name == "TopHud" || parentBorder.Name == "FuseInfoOverlay"))
             {
                 return;
             }
@@ -228,6 +229,7 @@ public partial class MainWindow
         TogglePanelLight.IsChecked = true;
         NightDimOverlay.BeginAnimation(UIElement.OpacityProperty, null);
         NightDimOverlay.Opacity = 0;
+        FuseInfoOverlay.Visibility = Visibility.Collapsed;
 
         if (FindName("SensorHourMeterBright") is Image hm) { hm.BeginAnimation(UIElement.OpacityProperty, null); hm.Opacity = 0; }
         if (FindName("SensorAmmeterBright") is Image am) { am.BeginAnimation(UIElement.OpacityProperty, null); am.Opacity = 0; }
@@ -711,7 +713,7 @@ public partial class MainWindow
             "Speedometer" => ("СПИДОМЕТР", "Скорость и пробег", "Отображает текущую скорость движения машины (км/ч) и пройденный километраж. Максимальная скорость по шоссе — 65 км/ч."),
             "Temperature" => ("ТЕРМОМЕТР ТУЭ-48", "Контроль температуры", "Двойной указатель: отображает температуру охлаждающей жидкости (слева) и масла двигателя (справа)."),
             "Oil" => ("МАСЛО ДВ.", "Давление масла двигателя", "Показывает давление в системе смазки дизеля. Нормальное эксплуатационное значение — 4-5 кгс/см²."),
-            "Lubricant" => ("СМАЗКА КПП", "Давление смазки", "Отображает текущее давление масла в системе смазки силовой передачи (коробки передач)."),
+            "Lubricant" => ("СМАЗКА КПП", "Давление смазки", "Отображает теку давление масла в системе смазки силовой передачи (коробки передач)."),
 
             "ToggleL1" => ("ВЫХОД ЗА ГАБАРИТ", "Сигнализация", "Включение системы звуковой и световой сигнализации при выходе вооружения за безопасные габариты машины."),
             "ToggleL2" => ("ТДА", "Термодымовая аппаратура", "Включение насоса ТДА многократного действия для впрыска топлива в выпускной коллектор и постановки плотной дымовой завесы."),
@@ -768,6 +770,7 @@ public partial class MainWindow
 
         _activeKnob = el;
         _lastKnobMousePos = e.GetPosition(this);
+        _accumulatedRotation = 0; // Сбрасываем счетчик при новом клике
         el.CaptureMouse();
     }
 
@@ -780,7 +783,25 @@ public partial class MainWindow
 
         if (_activeKnob.RenderTransform is RotateTransform rotate)
         {
-            rotate.Angle = (rotate.Angle + deltaX * 1.5) % 360;
+            double angleDelta = deltaX * 1.5;
+            rotate.Angle = (rotate.Angle + angleDelta) % 360;
+            _accumulatedRotation += Math.Abs(angleDelta); // Считаем общий угол поворота
+
+            // Если прокрутили крышку суммарно на 300 условных градусов (открутили)
+            if (_accumulatedRotation > 300)
+            {
+                if (_activeKnob.IsMouseCaptured)
+                {
+                    _activeKnob.ReleaseMouseCapture();
+                }
+                
+                _activeKnob = null;
+                _accumulatedRotation = 0;
+                
+                // Показываем окно с предохранителем
+                FuseInfoOverlay.Visibility = Visibility.Visible;
+                return;
+            }
         }
 
         _lastKnobMousePos = currentPos;
@@ -796,6 +817,12 @@ public partial class MainWindow
         }
 
         _activeKnob = null;
+    }
+
+    // Обработчик кнопки закрытия окна предохранителя
+    private void BtnCloseFuse_Click(object sender, RoutedEventArgs e)
+    {
+        FuseInfoOverlay.Visibility = Visibility.Collapsed;
     }
 
     private void BtnAbout_Click(object sender, RoutedEventArgs e)
